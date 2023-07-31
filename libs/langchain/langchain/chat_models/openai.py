@@ -447,7 +447,11 @@ class ChatOpenAI(BaseChatModel):
             default_chunk_class = chunk.__class__
             yield ChatGenerationChunk(message=chunk)
             if run_manager:
-                await run_manager.on_llm_new_token(chunk.content)
+                if "function_call" in chunk.additional_kwargs:
+                    content = chunk.additional_kwargs["function_call"]
+                else:
+                    content = chunk.content
+                await run_manager.on_llm_new_token(content)
 
     async def _agenerate(
         self,
